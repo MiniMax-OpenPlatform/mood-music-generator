@@ -81,6 +81,17 @@ jobs:
         cd mood_music_app_build
         flutter pub get
 
+    - name: Fix Kotlin version conflicts
+      run: |
+        cd mood_music_app_build/android
+        # Add Kotlin BOM to force consistent versions
+        cat >> app/build.gradle <<'GRADLE_EOF'
+
+        dependencies {
+            implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.0"))
+        }
+        GRADLE_EOF
+
     - name: Build APK
       run: |
         cd mood_music_app_build
