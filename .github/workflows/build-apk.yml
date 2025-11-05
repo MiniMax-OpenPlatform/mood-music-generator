@@ -33,13 +33,51 @@ jobs:
       run: |
         flutter create --org com.moodmusic --project-name mood_music_app mood_music_app_build
 
-        # Immediately update Kotlin version to 1.9.0
+    - name: Update Kotlin to 1.9.0
+      run: |
         cd mood_music_app_build/android
-        sed -i "s/ext.kotlin_version = '[^']*'/ext.kotlin_version = '1.9.0'/" build.gradle
 
-        # Verify the change
-        echo "Kotlin version in build.gradle:"
-        grep "kotlin_version" build.gradle
+        # Check current content
+        echo "=== Original build.gradle ==="
+        cat build.gradle
+
+        # Replace with updated version
+        cat > build.gradle <<'BUILD_GRADLE_EOF'
+        buildscript {
+            ext.kotlin_version = '1.9.0'
+            repositories {
+                google()
+                mavenCentral()
+            }
+
+            dependencies {
+                classpath 'com.android.tools.build:gradle:8.1.0'
+                classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+            }
+        }
+
+        allprojects {
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+
+        rootProject.buildDir = '../build'
+        subprojects {
+            project.buildDir = "${rootProject.buildDir}/${project.name}"
+        }
+        subprojects {
+            project.evaluationDependsOn(':app')
+        }
+
+        tasks.register("clean", Delete) {
+            delete rootProject.buildDir
+        }
+        BUILD_GRADLE_EOF
+
+        echo "=== Updated build.gradle ==="
+        cat build.gradle
         cd ../..
 
     - name: Copy source code
