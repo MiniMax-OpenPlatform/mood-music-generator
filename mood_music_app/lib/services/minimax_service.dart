@@ -1,0 +1,197 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
+import '../models/music_response.dart';
+
+class MinimaxService {
+  static const String llmApiUrl =
+      'https://api.minimaxi.com/v1/text/chatcompletion_v2';
+  static const String musicApiUrl =
+      'https://api.minimaxi.com/v1/music_generation';
+  static const String llmModel = 'MiniMax-Text-01';
+  static const String musicModel = 'music-2.0';
+
+  final String apiKey;
+
+  MinimaxService({required this.apiKey});
+
+  /// Generate music prompt and lyrics using LLM based on user mood
+  Future<Map<String, String>> generatePromptAndLyrics(String mood) async {
+    try {
+      final response = await http.post(
+        Uri.parse(llmApiUrl),
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'model': llmModel,
+          'messages': [
+            {
+              'role': 'system',
+              'content':
+                  '你是一位专业的音乐制作人和作词人。你的任务是根据用户的心情描述，生成合适的音乐风格描述和歌词。'
+                  '请严格按照以下 JSON 格式返回结果，不要包含其他内容：\n'
+                  '{"prompt": "音乐风格描述", "lyrics": "歌词内容"}\n\n'
+                  '要求：\n'
+                  '1. prompt: 中文描述，50-200字，包含风格、情绪、场景。例如："流行音乐, 难过, 适合在下雨的晚上"\n'
+                  '2. lyrics: 中文歌词，100-500字，使用\\n分隔每行。必须包含歌曲结构标签：[Intro], [Verse], [Chorus], [Bridge], [Outro]'
+            },
+            {
+              'role': 'user',
+              'content': '我现在的心情是：$mood\n\n请为我创作音乐和歌词。'
+            }
+          ],
+          'max_tokens': 4096,
+          'temperature': 0.7,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(response.bodyBytes));
+        final content = data['choices'][0]['message']['content'] as String;
+
+        // Try to parse JSON from content
+        try {
+          // Find JSON object in content
+          final jsonStart = content.indexOf('{');
+          final jsonEnd = content.lastIndexOf('}') + 1;
+          if (jsonStart != -1 && jsonEnd > jsonStart) {
+            final jsonStr = content.substring(jsonStart, jsonEnd);
+            final parsed = jsonDecode(jsonStr) as Map<String, dynamic>;
+            return {
+              'prompt': parsed['prompt'] as String,
+              'lyrics': parsed['lyrics'] as String,
+            };
+          }
+        } catch (e) {
+          print('Failed to parse LLM response as JSON: $e');
+        }
+
+        // Fallback: Use default prompt and lyrics
+        return {
+          'prompt': '流行音乐, 温柔, 适合在午后聆听',
+          'lyrics':
+              '[Intro]\n轻轻的\n微风吹过\n\n[Verse]\n心情如同云朵\n飘荡在天空\n\n[Chorus]\n让音乐带走烦恼\n让旋律治愈心灵\n\n[Bridge]\n每一个音符\n都是温柔的拥抱\n\n[Outro]\n慢慢地\n找回宁静',
+        };
+      } else {
+        throw Exception(
+            'LLM API failed: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('Error calling LLM API: $e');
+      // Return default values on error
+      return {
+        'prompt': '流行音乐, 温柔, 适合在午后聆听',
+        'lyrics':
+            '[Intro]\n轻轻的\n微风吹过\n\n[Verse]\n心情如同云朵\n飘荡在天空\n\n[Chorus]\n让音乐带走烦恼\n让旋律治愈心灵\n\n[Bridge]\n每一个音符\n都是温柔的拥抱\n\n[Outro]\n慢慢地\n找回宁静',
+      };
+    }
+  }
+
+  /// Generate music using MiniMax Music API
+  Future<String> generateMusic(String prompt, String lyrics) async {
+    final response = await http.post(
+      Uri.parse(musicApiUrl),
+      headers: {
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'model': musicModel,
+        'text': {
+          'prompt': prompt,
+          'lyric': lyrics,
+        },
+        'audio_setting': {
+          'sample_rate': 44100,
+          'bitrate': 256000,
+          'format': 'mp3',
+        },
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+
+      // Check for audio data
+      if (data['data'] != null && data['data']['audio'] != null) {
+        final audioHex = data['data']['audio'] as String;
+        return audioHex;
+      } else {
+        throw Exception('No audio data in response');
+      }
+    } else {
+      throw Exception(
+          'Music API failed: ${response.statusCode} - ${response.body}');
+    }
+  }
+
+  /// Convert hex string to audio file and save it
+  Future<String> saveAudioFile(String audioHex, String sessionId) async {
+    // Convert hex to bytes
+    final bytes = _hexToBytes(audioHex);
+
+    // Get app documents directory
+    final directory = await getApplicationDocumentsDirectory();
+    final sessionDir = Directory(path.join(directory.path, sessionId));
+    if (!await sessionDir.exists()) {
+      await sessionDir.create(recursive: true);
+    }
+
+    // Save file
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final filePath = path.join(sessionDir.path, 'music_$timestamp.mp3');
+    final file = File(filePath);
+    await file.writeAsBytes(bytes);
+
+    return filePath;
+  }
+
+  /// Helper function to convert hex string to bytes
+  Uint8List _hexToBytes(String hex) {
+    final result = Uint8List(hex.length ~/ 2);
+    for (int i = 0; i < result.length; i++) {
+      final byteString = hex.substring(i * 2, i * 2 + 2);
+      result[i] = int.parse(byteString, radix: 16);
+    }
+    return result;
+  }
+
+  /// Generate complete music from mood (combines all steps)
+  Future<MusicResponse> generateFromMood(
+    String mood,
+    String sessionId, {
+    Function(String)? onProgress,
+  }) async {
+    try {
+      // Step 1: Generate prompt and lyrics
+      onProgress?.call('正在分析你的心情...');
+      final promptAndLyrics = await generatePromptAndLyrics(mood);
+      final prompt = promptAndLyrics['prompt']!;
+      final lyrics = promptAndLyrics['lyrics']!;
+
+      // Step 2: Generate music
+      onProgress?.call('正在生成音乐...');
+      final audioHex = await generateMusic(prompt, lyrics);
+
+      // Step 3: Save audio file
+      onProgress?.call('正在处理音频文件...');
+      final audioPath = await saveAudioFile(audioHex, sessionId);
+
+      onProgress?.call('创作完成！');
+
+      return MusicResponse(
+        audioUrl: audioPath,
+        prompt: prompt,
+        lyrics: lyrics,
+        sessionId: sessionId,
+      );
+    } catch (e) {
+      throw Exception('Failed to generate music: $e');
+    }
+  }
+}
