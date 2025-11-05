@@ -1,0 +1,87 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'mood_music_app/**'
+      - '.github/workflows/build-apk.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '11'
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.16.0'
+        channel: 'stable'
+
+    - name: Create Flutter project structure
+      run: |
+        flutter create --org com.moodmusic --project-name mood_music_app mood_music_app_build
+
+    - name: Copy source code
+      run: |
+        cp -r mood_music_app/lib/* mood_music_app_build/lib/
+        cp mood_music_app/pubspec.yaml mood_music_app_build/
+
+    - name: Get dependencies
+      run: |
+        cd mood_music_app_build
+        flutter pub get
+
+    - name: Build APK
+      run: |
+        cd mood_music_app_build
+        flutter build apk --release --split-per-abi
+
+    - name: Upload APK artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-apk
+        path: mood_music_app_build/build/app/outputs/flutter-apk/*.apk
+
+    - name: Create Release
+      if: github.ref == 'refs/heads/master'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: Release v1.0.${{ github.run_number }}
+        body: |
+          🎵 心情音乐生成器 Android 应用
+
+          自动构建版本 v1.0.${{ github.run_number }}
+
+          ### 安装说明
+          - 下载适合你设备的 APK 文件
+          - `app-arm64-v8a-release.apk` - 适用于大多数新设备（推荐）
+          - `app-armeabi-v7a-release.apk` - 适用于较旧的设备
+          - `app-x86_64-release.apk` - 适用于模拟器
+
+          ### 使用方法
+          1. 安装 APK 到 Android 设备
+          2. 打开应用并输入 MiniMax API Key
+          3. 描述你的心情或选择快捷选项
+          4. 点击生成音乐并等待
+          5. 播放、分享或重新生成
+
+          🤖 自动构建于 GitHub Actions
+        files: |
+          mood_music_app_build/build/app/outputs/flutter-apk/*.apk
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
