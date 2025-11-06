@@ -132,27 +132,35 @@ class MoodInputSection extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 8,
+                    vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFf0f0f0),
+                    gradient: moodController.text == mood
+                        ? const LinearGradient(
+                            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                          )
+                        : null,
+                    color: moodController.text == mood
+                        ? null
+                        : const Color(0xFFE8E8E8),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: moodController.text == mood
                           ? const Color(0xFF667eea)
-                          : Colors.transparent,
-                      width: 2,
+                          : const Color(0xFFCCCCCC),
+                      width: 1.5,
                     ),
                   ),
                   child: Text(
                     mood,
                     style: TextStyle(
                       color: moodController.text == mood
-                          ? const Color(0xFF667eea)
-                          : const Color(0xFF666),
+                          ? Colors.white
+                          : const Color(0xFF333333),
+                      fontSize: 14,
                       fontWeight: moodController.text == mood
                           ? FontWeight.bold
-                          : FontWeight.normal,
+                          : FontWeight.w500,
                     ),
                   ),
                 ),

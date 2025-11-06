@@ -122,10 +122,8 @@ class MinimaxService {
       ),
       data: {
         'model': musicModel,
-        'text': {
-          'prompt': prompt,
-          'lyrics': lyrics,  // Fixed: was 'lyric', should be 'lyrics'
-        },
+        'prompt': prompt,
+        'lyrics': lyrics,
         'audio_setting': {
           'sample_rate': 44100,
           'bitrate': 256000,
