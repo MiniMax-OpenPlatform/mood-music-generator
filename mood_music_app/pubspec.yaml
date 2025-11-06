@@ -43,6 +43,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Uncomment to add app icon
-  # assets:
-  #   - assets/images/
+  assets:
+    - assets/app_icon.png
