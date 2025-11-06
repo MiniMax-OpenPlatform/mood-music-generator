@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../models/music_response.dart';
@@ -15,19 +15,27 @@ class MinimaxService {
   static const String musicModel = 'music-2.0';
 
   final String apiKey;
+  late final Dio _dio;
 
-  MinimaxService({required this.apiKey});
+  MinimaxService({required this.apiKey}) {
+    _dio = Dio(BaseOptions(
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 60),
+    ));
+  }
 
   /// Generate music prompt and lyrics using LLM based on user mood
   Future<Map<String, String>> generatePromptAndLyrics(String mood) async {
     try {
-      final response = await http.post(
-        Uri.parse(llmApiUrl),
-        headers: {
-          'Authorization': 'Bearer $apiKey',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
+      final response = await _dio.post(
+        llmApiUrl,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $apiKey',
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: {
           'model': llmModel,
           'messages': [
             {
@@ -47,11 +55,11 @@ class MinimaxService {
           ],
           'max_tokens': 4096,
           'temperature': 0.7,
-        }),
+        },
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(response.bodyBytes));
+        final data = response.data;
         final content = data['choices'][0]['message']['content'] as String;
 
         // Try to parse JSON from content
@@ -79,7 +87,7 @@ class MinimaxService {
         };
       } else {
         throw Exception(
-            'LLM API failed: ${response.statusCode} - ${response.body}');
+            'LLM API failed: ${response.statusCode} - ${response.data}');
       }
     } catch (e) {
       print('Error calling LLM API: $e');
@@ -94,13 +102,15 @@ class MinimaxService {
 
   /// Generate music using MiniMax Music API
   Future<String> generateMusic(String prompt, String lyrics) async {
-    final response = await http.post(
-      Uri.parse(musicApiUrl),
-      headers: {
-        'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
+    final response = await _dio.post(
+      musicApiUrl,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+      ),
+      data: {
         'model': musicModel,
         'text': {
           'prompt': prompt,
@@ -111,11 +121,11 @@ class MinimaxService {
           'bitrate': 256000,
           'format': 'mp3',
         },
-      }),
+      },
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      final data = response.data;
 
       // Check for audio data
       if (data['data'] != null && data['data']['audio'] != null) {
@@ -126,7 +136,7 @@ class MinimaxService {
       }
     } else {
       throw Exception(
-          'Music API failed: ${response.statusCode} - ${response.body}');
+          'Music API failed: ${response.statusCode} - ${response.data}');
     }
   }
 

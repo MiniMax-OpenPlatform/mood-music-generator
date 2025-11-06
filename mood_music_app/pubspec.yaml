@@ -13,8 +13,7 @@ dependencies:
   # UI & Material Design
   cupertino_icons: ^1.0.6
 
-  # HTTP Client
-  http: ^1.2.0
+  # HTTP Client - downgraded for audioplayers compatibility
   dio: ^5.4.0
 
   # Audio Player - using older compatible version
