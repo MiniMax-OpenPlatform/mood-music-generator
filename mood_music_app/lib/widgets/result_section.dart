@@ -175,7 +175,7 @@ class _ResultSectionState extends State<ResultSection> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                colors: [Color(0xFFFF6B9D), Color(0xFFFF91B3)],
               ),
               borderRadius: BorderRadius.circular(12),
             ),
@@ -345,7 +345,7 @@ class _ResultSectionState extends State<ResultSection> {
                   icon: const Icon(Icons.refresh),
                   label: const Text('重新生成'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF667eea),
+                    backgroundColor: const Color(0xFFFF6B9D),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(

@@ -32,7 +32,7 @@ class MoodMusicApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF667eea),
+          seedColor: const Color(0xFFFF6B9D),  // Pink theme
           brightness: Brightness.light,
         ),
         useMaterial3: true,

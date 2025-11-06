@@ -32,6 +32,9 @@ dependencies:
   # Sharing
   share_plus: ^7.2.1
 
+  # URL Launcher
+  url_launcher: ^6.2.4
+
   # UI Utilities
   flutter_spinkit: ^5.2.0
 

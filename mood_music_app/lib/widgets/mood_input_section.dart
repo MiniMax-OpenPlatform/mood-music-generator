@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MoodInputSection extends StatelessWidget {
   final TextEditingController moodController;
@@ -57,7 +58,7 @@ class MoodInputSection extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF667eea), width: 2),
+                borderSide: const BorderSide(color: Color(0xFFFF6B9D), width: 2),
               ),
               filled: true,
               fillColor: const Color(0xFFF8F9FA),
@@ -71,8 +72,11 @@ class MoodInputSection extends StatelessWidget {
                 style: TextStyle(fontSize: 12, color: Color(0xFF666)),
               ),
               TextButton(
-                onPressed: () {
-                  // Open MiniMax website
+                onPressed: () async {
+                  final url = Uri.parse('https://platform.minimaxi.com/docs/guides/models-intro');
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
                 },
                 child: const Text(
                   '点击这里注册获取',
@@ -105,7 +109,7 @@ class MoodInputSection extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF667eea), width: 2),
+                borderSide: const BorderSide(color: Color(0xFFFF6B9D), width: 2),
               ),
               filled: true,
               fillColor: const Color(0xFFF8F9FA),
@@ -137,7 +141,7 @@ class MoodInputSection extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: moodController.text == mood
                         ? const LinearGradient(
-                            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                            colors: [Color(0xFFFF6B9D), Color(0xFFFF91B3)],
                           )
                         : null,
                     color: moodController.text == mood
@@ -146,7 +150,7 @@ class MoodInputSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: moodController.text == mood
-                          ? const Color(0xFF667eea)
+                          ? const Color(0xFFFF6B9D)
                           : const Color(0xFFCCCCCC),
                       width: 1.5,
                     ),
@@ -174,7 +178,7 @@ class MoodInputSection extends StatelessWidget {
           ElevatedButton(
             onPressed: isLoading ? null : onGenerate,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF667eea),
+              backgroundColor: const Color(0xFFFF6B9D),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(

@@ -44,7 +44,7 @@ class ProgressSection extends StatelessWidget {
               value: state.progress,
               minHeight: 10,
               backgroundColor: const Color(0xFFf0f0f0),
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
+              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF6B9D)),
             ),
           ),
           const SizedBox(height: 10),
@@ -158,11 +158,11 @@ class ProgressSection extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isCompleted
-                ? const Color(0xFF667eea)
+                ? const Color(0xFFFF6B9D)
                 : const Color(0xFFf0f0f0),
             border: Border.all(
               color: isActive
-                  ? const Color(0xFF667eea)
+                  ? const Color(0xFFFF6B9D)
                   : Colors.transparent,
               width: 2,
             ),
@@ -178,7 +178,7 @@ class ProgressSection extends StatelessWidget {
                     number,
                     style: TextStyle(
                       color: isActive
-                          ? const Color(0xFF667eea)
+                          ? const Color(0xFFFF6B9D)
                           : const Color(0xFF999),
                       fontWeight: FontWeight.bold,
                     ),

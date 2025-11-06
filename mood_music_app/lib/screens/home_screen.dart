@@ -131,9 +131,9 @@ class _HomeScreenState extends State<HomeScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF667eea),
-              Color(0xFF764ba2),
-              Color(0xFFf093fb),
+              Color(0xFFFF6B9D),  // Pink
+              Color(0xFFFFC3E1),  // Light pink
+              Color(0xFFFFE5F1),  // Pale pink
             ],
           ),
         ),
