@@ -136,20 +136,17 @@ class MinimaxService {
             'sample_rate': 44100,
             'bitrate': 256000,
             'format': 'mp3',
-            'output_format': 'url',  // Return URL instead of hex data
           },
         },
       );
 
-      // Print Trace-ID from response headers
-      final musicTraceId = response.headers.value('trace-id') ??
-                           response.headers.value('Trace-ID') ??
-                           'N/A';
-      print('Music API Trace-ID: $musicTraceId');
-      print('Response Status Code: ${response.statusCode}');
-
       if (response.statusCode == 200) {
         final data = response.data;
+
+        // Get trace_id from response body (not headers!)
+        final musicTraceId = data['trace_id'] ?? 'N/A';
+        print('Music API Trace-ID: $musicTraceId');
+        print('Response Status Code: ${response.statusCode}');
 
         // Print full response for debugging
         print('Music API Response type: ${data.runtimeType}');
@@ -158,37 +155,40 @@ class MinimaxService {
         if (data != null && data['data'] != null) {
           print('Music API data.data type: ${data['data'].runtimeType}');
           print('Music API data.data keys: ${data['data'].keys}');
-          print('Music API full data.data content: ${data['data']}');
+          print('Music API data.data content: ${data['data']}');
         } else {
           print('WARNING: data or data["data"] is null!');
           print('Full response: $data');
         }
 
-        // Check for audio URL
-        if (data['data'] != null && data['data']['audio_url'] != null) {
-          final audioUrl = data['data']['audio_url'] as String;
+        // Check for audio URL (correct field name is 'audio', not 'audio_url')
+        if (data['data'] != null && data['data']['audio'] != null) {
+          final audioUrl = data['data']['audio'] as String;
           print('✅ Music API returned URL: $audioUrl');
+
+          // Also log status
+          final status = data['data']['status'];
+          print('Music generation status: $status');
+
           return {
             'url': audioUrl,
             'trace_id': musicTraceId,
           };
         } else {
-          // Maybe the API returns 'audio' field instead of 'audio_url'?
-          if (data['data'] != null && data['data']['audio'] != null) {
-            print('⚠️ Found "audio" field instead of "audio_url"');
-            final audioData = data['data']['audio'];
-            print('Audio data type: ${audioData.runtimeType}');
-            print('Audio data: $audioData');
-          }
-
           throw Exception('No audio URL in response. Trace-ID: $musicTraceId. Full response: $data');
         }
       } else {
+        // Get trace_id even on error
+        final data = response.data;
+        final musicTraceId = data?['trace_id'] ?? 'N/A';
         throw Exception(
             'Music API failed: ${response.statusCode} - ${response.data}. Trace-ID: $musicTraceId');
       }
     } catch (e) {
       print('❌ Music API Error: $e');
+      if (e.toString().contains('SocketException') || e.toString().contains('TimeoutException')) {
+        print('⚠️ Network or timeout issue - check internet connection');
+      }
       rethrow;
     }
   }
