@@ -64,7 +64,15 @@ class _ResultSectionState extends State<ResultSection> {
 
   Future<void> _playAudio() async {
     try {
-      await _audioPlayer.play(DeviceFileSource(widget.response.audioUrl));
+      // Check if URL is a network URL or local file
+      if (widget.response.audioUrl.startsWith('http://') ||
+          widget.response.audioUrl.startsWith('https://')) {
+        // Network URL
+        await _audioPlayer.play(UrlSource(widget.response.audioUrl));
+      } else {
+        // Local file path
+        await _audioPlayer.play(DeviceFileSource(widget.response.audioUrl));
+      }
     } catch (e) {
       print('Error playing audio: $e');
       if (mounted) {
@@ -89,17 +97,27 @@ class _ResultSectionState extends State<ResultSection> {
 
   Future<void> _shareMusic() async {
     try {
-      final file = File(widget.response.audioUrl);
-      if (await file.exists()) {
-        await Share.shareXFiles(
-          [XFile(widget.response.audioUrl)],
-          text: '🎵 我的心情音乐\n\n${widget.response.lyrics}',
+      // Check if it's a URL or local file
+      if (widget.response.audioUrl.startsWith('http://') ||
+          widget.response.audioUrl.startsWith('https://')) {
+        // Share URL directly
+        await Share.share(
+          '🎵 我的心情音乐\n\n${widget.response.lyrics}\n\n音频链接: ${widget.response.audioUrl}',
         );
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('音频文件不存在')),
+        // Share local file
+        final file = File(widget.response.audioUrl);
+        if (await file.exists()) {
+          await Share.shareXFiles(
+            [XFile(widget.response.audioUrl)],
+            text: '🎵 我的心情音乐\n\n${widget.response.lyrics}',
           );
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('音频文件不存在')),
+            );
+          }
         }
       }
     } catch (e) {

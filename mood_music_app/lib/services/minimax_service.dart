@@ -110,7 +110,7 @@ class MinimaxService {
   }
 
   /// Generate music using MiniMax Music API
-  /// Returns a map with 'audio' and 'trace_id'
+  /// Returns a map with 'url' and 'trace_id'
   Future<Map<String, String>> generateMusic(String prompt, String lyrics) async {
     final response = await _dio.post(
       musicApiUrl,
@@ -124,12 +124,13 @@ class MinimaxService {
         'model': musicModel,
         'text': {
           'prompt': prompt,
-          'lyric': lyrics,
+          'lyrics': lyrics,  // Fixed: was 'lyric', should be 'lyrics'
         },
         'audio_setting': {
           'sample_rate': 44100,
           'bitrate': 256000,
           'format': 'mp3',
+          'output_format': 'url',  // Return URL instead of hex data
         },
       },
     );
@@ -149,15 +150,16 @@ class MinimaxService {
         print('Music API data.data keys: ${data['data'].keys}');
       }
 
-      // Check for audio data
-      if (data['data'] != null && data['data']['audio'] != null) {
-        final audioHex = data['data']['audio'] as String;
+      // Check for audio URL
+      if (data['data'] != null && data['data']['audio_url'] != null) {
+        final audioUrl = data['data']['audio_url'] as String;
+        print('Music API returned URL: $audioUrl');
         return {
-          'audio': audioHex,
+          'url': audioUrl,
           'trace_id': musicTraceId,
         };
       } else {
-        throw Exception('No audio data in response. Trace-ID: $musicTraceId');
+        throw Exception('No audio URL in response. Trace-ID: $musicTraceId. Response: ${data}');
       }
     } else {
       throw Exception(
@@ -210,20 +212,16 @@ class MinimaxService {
       final lyrics = promptAndLyrics['lyrics']!;
       final llmTraceId = promptAndLyrics['llm_trace_id'];
 
-      // Step 2: Generate music
+      // Step 2: Generate music (now returns URL directly)
       onProgress?.call('正在生成音乐...');
       final musicResult = await generateMusic(prompt, lyrics);
-      final audioHex = musicResult['audio']!;
+      final audioUrl = musicResult['url']!;
       final musicTraceId = musicResult['trace_id'];
-
-      // Step 3: Save audio file
-      onProgress?.call('正在处理音频文件...');
-      final audioPath = await saveAudioFile(audioHex, sessionId);
 
       onProgress?.call('创作完成！');
 
       return MusicResponse(
-        audioUrl: audioPath,
+        audioUrl: audioUrl,
         prompt: prompt,
         lyrics: lyrics,
         sessionId: sessionId,
