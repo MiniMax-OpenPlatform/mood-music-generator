@@ -58,6 +58,12 @@ class MinimaxService {
         },
       );
 
+      // Print Trace-ID from response headers
+      final llmTraceId = response.headers.value('trace-id') ??
+                         response.headers.value('Trace-ID') ??
+                         'N/A';
+      print('LLM API Trace-ID: $llmTraceId');
+
       if (response.statusCode == 200) {
         final data = response.data;
         final content = data['choices'][0]['message']['content'] as String;
@@ -73,6 +79,7 @@ class MinimaxService {
             return {
               'prompt': parsed['prompt'] as String,
               'lyrics': parsed['lyrics'] as String,
+              'llm_trace_id': llmTraceId,
             };
           }
         } catch (e) {
@@ -84,6 +91,7 @@ class MinimaxService {
           'prompt': '流行音乐, 温柔, 适合在午后聆听',
           'lyrics':
               '[Intro]\n轻轻的\n微风吹过\n\n[Verse]\n心情如同云朵\n飘荡在天空\n\n[Chorus]\n让音乐带走烦恼\n让旋律治愈心灵\n\n[Bridge]\n每一个音符\n都是温柔的拥抱\n\n[Outro]\n慢慢地\n找回宁静',
+          'llm_trace_id': llmTraceId,
         };
       } else {
         throw Exception(
@@ -96,12 +104,14 @@ class MinimaxService {
         'prompt': '流行音乐, 温柔, 适合在午后聆听',
         'lyrics':
             '[Intro]\n轻轻的\n微风吹过\n\n[Verse]\n心情如同云朵\n飘荡在天空\n\n[Chorus]\n让音乐带走烦恼\n让旋律治愈心灵\n\n[Bridge]\n每一个音符\n都是温柔的拥抱\n\n[Outro]\n慢慢地\n找回宁静',
+        'llm_trace_id': 'Error: $e',
       };
     }
   }
 
   /// Generate music using MiniMax Music API
-  Future<String> generateMusic(String prompt, String lyrics) async {
+  /// Returns a map with 'audio' and 'trace_id'
+  Future<Map<String, String>> generateMusic(String prompt, String lyrics) async {
     final response = await _dio.post(
       musicApiUrl,
       options: Options(
@@ -124,19 +134,34 @@ class MinimaxService {
       },
     );
 
+    // Print Trace-ID from response headers
+    final musicTraceId = response.headers.value('trace-id') ??
+                         response.headers.value('Trace-ID') ??
+                         'N/A';
+    print('Music API Trace-ID: $musicTraceId');
+
     if (response.statusCode == 200) {
       final data = response.data;
+
+      // Print full response for debugging
+      print('Music API Response data keys: ${data?.keys}');
+      if (data != null && data['data'] != null) {
+        print('Music API data.data keys: ${data['data'].keys}');
+      }
 
       // Check for audio data
       if (data['data'] != null && data['data']['audio'] != null) {
         final audioHex = data['data']['audio'] as String;
-        return audioHex;
+        return {
+          'audio': audioHex,
+          'trace_id': musicTraceId,
+        };
       } else {
-        throw Exception('No audio data in response');
+        throw Exception('No audio data in response. Trace-ID: $musicTraceId');
       }
     } else {
       throw Exception(
-          'Music API failed: ${response.statusCode} - ${response.data}');
+          'Music API failed: ${response.statusCode} - ${response.data}. Trace-ID: $musicTraceId');
     }
   }
 
@@ -183,10 +208,13 @@ class MinimaxService {
       final promptAndLyrics = await generatePromptAndLyrics(mood);
       final prompt = promptAndLyrics['prompt']!;
       final lyrics = promptAndLyrics['lyrics']!;
+      final llmTraceId = promptAndLyrics['llm_trace_id'];
 
       // Step 2: Generate music
       onProgress?.call('正在生成音乐...');
-      final audioHex = await generateMusic(prompt, lyrics);
+      final musicResult = await generateMusic(prompt, lyrics);
+      final audioHex = musicResult['audio']!;
+      final musicTraceId = musicResult['trace_id'];
 
       // Step 3: Save audio file
       onProgress?.call('正在处理音频文件...');
@@ -199,6 +227,8 @@ class MinimaxService {
         prompt: prompt,
         lyrics: lyrics,
         sessionId: sessionId,
+        llmTraceId: llmTraceId,
+        musicTraceId: musicTraceId,
       );
     } catch (e) {
       throw Exception('Failed to generate music: $e');

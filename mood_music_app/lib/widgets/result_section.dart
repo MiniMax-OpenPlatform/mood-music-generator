@@ -266,6 +266,38 @@ class _ResultSectionState extends State<ResultSection> {
                     height: 1.5,
                   ),
                 ),
+                if (widget.response.llmTraceId != null || widget.response.musicTraceId != null) ...[
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'API Trace IDs',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF999),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  if (widget.response.llmTraceId != null)
+                    SelectableText(
+                      'LLM: ${widget.response.llmTraceId}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF666),
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  if (widget.response.musicTraceId != null)
+                    SelectableText(
+                      'Music: ${widget.response.musicTraceId}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF666),
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                ],
               ],
             ),
           ),

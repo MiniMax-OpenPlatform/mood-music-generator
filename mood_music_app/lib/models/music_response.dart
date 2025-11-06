@@ -3,12 +3,16 @@ class MusicResponse {
   final String prompt;
   final String lyrics;
   final String sessionId;
+  final String? llmTraceId;
+  final String? musicTraceId;
 
   MusicResponse({
     required this.audioUrl,
     required this.prompt,
     required this.lyrics,
     required this.sessionId,
+    this.llmTraceId,
+    this.musicTraceId,
   });
 
   factory MusicResponse.fromJson(Map<String, dynamic> json) {
@@ -17,6 +21,8 @@ class MusicResponse {
       prompt: json['prompt'] as String,
       lyrics: json['lyrics'] as String,
       sessionId: json['session_id'] as String,
+      llmTraceId: json['llm_trace_id'] as String?,
+      musicTraceId: json['music_trace_id'] as String?,
     );
   }
 
@@ -26,6 +32,8 @@ class MusicResponse {
       'prompt': prompt,
       'lyrics': lyrics,
       'session_id': sessionId,
+      'llm_trace_id': llmTraceId,
+      'music_trace_id': musicTraceId,
     };
   }
 }
