@@ -137,6 +137,7 @@ class MinimaxService {
             'bitrate': 256000,
             'format': 'mp3',
           },
+          'output_format': 'url',  // Top-level parameter, not inside audio_setting
         },
       );
 
