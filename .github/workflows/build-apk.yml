@@ -126,6 +126,11 @@ jobs:
     - name: Fix Kotlin stdlib conflicts
       run: |
         cd mood_music_app_build/android/app
+
+        # Update apply plugin line to use kotlin-android
+        sed -i "s/apply plugin: 'kotlin-android'/apply plugin: 'org.jetbrains.kotlin.android'/" build.gradle
+
+        # Add Kotlin options after android block
         cat >> build.gradle <<'GRADLE_EOF'
 
         configurations.all {
@@ -137,6 +142,7 @@ jobs:
         }
 
         dependencies {
+            implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.0'
             constraints {
                 implementation('org.jetbrains.kotlin:kotlin-stdlib-jdk7') {
                     because 'Kotlin stdlib is now combined in main stdlib'
@@ -148,7 +154,7 @@ jobs:
         }
         GRADLE_EOF
         echo "=== Updated app/build.gradle ==="
-        tail -30 build.gradle
+        tail -35 build.gradle
         cd ../../..
 
     - name: Get dependencies
