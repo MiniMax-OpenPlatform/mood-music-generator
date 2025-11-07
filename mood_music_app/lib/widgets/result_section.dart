@@ -145,7 +145,7 @@ class _ResultSectionState extends State<ResultSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -172,7 +172,7 @@ class _ResultSectionState extends State<ResultSection> {
 
           // Audio Player
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFFFF6B9D), Color(0xFFFF91B3)],
@@ -186,12 +186,13 @@ class _ResultSectionState extends State<ResultSection> {
                   onPressed: _togglePlayPause,
                   icon: Icon(
                     _isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
-                    size: 64,
+                    size: 56,
                   ),
                   color: Colors.white,
+                  padding: EdgeInsets.zero,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
 
                 // Progress Bar
                 Column(
@@ -242,7 +243,7 @@ class _ResultSectionState extends State<ResultSection> {
 
           // Music Info
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: const Color(0xFFF8F9FA),
               borderRadius: BorderRadius.circular(12),
@@ -253,36 +254,40 @@ class _ResultSectionState extends State<ResultSection> {
                 const Text(
                   '音乐风格',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF666),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   widget.response.prompt,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     color: Color(0xFF333),
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 const Text(
                   '歌词',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF666),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   widget.response.lyrics,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     color: Color(0xFF333),
-                    height: 1.5,
+                    height: 1.4,
                   ),
+                  maxLines: 6,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 if (widget.response.llmTraceId != null || widget.response.musicTraceId != null) ...[
                   const SizedBox(height: 12),
