@@ -102,14 +102,6 @@ class MoodInputSection extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Quick Mood Buttons
-          const Text(
-            '或选择快捷心情:',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFF666),
-            ),
-          ),
-          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,

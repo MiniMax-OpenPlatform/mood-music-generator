@@ -252,34 +252,17 @@ class _ResultSectionState extends State<ResultSection> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '音乐风格',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF666),
-                  ),
-                ),
-                const SizedBox(height: 2),
                 Text(
                   widget.response.prompt,
                   style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF333),
+                    fontSize: 14,
+                    color: Color(0xFF000000),
+                    fontWeight: FontWeight.w600,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 6),
-                const Text(
-                  '歌词',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF666),
-                  ),
-                ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 8),
                 ConstrainedBox(
                   constraints: const BoxConstraints(
                     maxHeight: 120,
