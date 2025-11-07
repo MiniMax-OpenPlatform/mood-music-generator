@@ -168,7 +168,7 @@ class _ResultSectionState extends State<ResultSection> {
               color: Color(0xFF333333),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // Audio Player
           Container(
@@ -266,7 +266,7 @@ class _ResultSectionState extends State<ResultSection> {
                     color: Color(0xFF333),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 const Text(
                   '歌词',
                   style: TextStyle(
@@ -285,9 +285,9 @@ class _ResultSectionState extends State<ResultSection> {
                   ),
                 ),
                 if (widget.response.llmTraceId != null || widget.response.musicTraceId != null) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   const Divider(),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   const Text(
                     'API Trace IDs',
                     style: TextStyle(

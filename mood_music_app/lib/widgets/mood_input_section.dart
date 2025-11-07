@@ -64,9 +64,9 @@ class MoodInputSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            '没有 API Key？请访问: https://platform.minimaxi.com/user-center/basic-information/interface-key',
-            style: TextStyle(fontSize: 12, color: Color(0xFF666)),
+          const SelectableText(
+            '没有 API Key？请访问:\nhttps://platform.minimaxi.com/user-center/basic-information/interface-key',
+            style: TextStyle(fontSize: 11, color: Color(0xFF666), height: 1.4),
           ),
 
           const SizedBox(height: 20),

@@ -157,6 +157,7 @@ class ProgressSection extends StatelessWidget {
   ) {
     return Expanded(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: 40,
@@ -191,11 +192,12 @@ class ProgressSection extends StatelessWidget {
                     ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             label,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               color: isCompleted || isActive
                   ? const Color(0xFF333)
                   : const Color(0xFF999),
@@ -205,11 +207,12 @@ class ProgressSection extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             description,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 9,
               color: isCompleted || isActive
-                  ? const Color(0xFF666)
-                  : const Color(0xFFBBB),
+                  ? const Color(0xFF888)
+                  : const Color(0xFFCCC),
             ),
           ),
         ],
