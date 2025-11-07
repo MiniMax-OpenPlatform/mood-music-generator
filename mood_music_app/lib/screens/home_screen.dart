@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/generation_state.dart';
 import '../models/music_response.dart';
 import '../services/minimax_service.dart';
@@ -33,6 +34,27 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadSavedApiKey();
+  }
+
+  Future<void> _loadSavedApiKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedApiKey = prefs.getString('api_key');
+    if (savedApiKey != null && savedApiKey.isNotEmpty) {
+      setState(() {
+        _apiKeyController.text = savedApiKey;
+      });
+    }
+  }
+
+  Future<void> _saveApiKey(String apiKey) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('api_key', apiKey);
+  }
+
+  @override
   void dispose() {
     _moodController.dispose();
     _apiKeyController.dispose();
@@ -58,6 +80,9 @@ class _HomeScreenState extends State<HomeScreen> {
       _showError('请输入 MiniMax API Key');
       return;
     }
+
+    // Save API Key for future use
+    await _saveApiKey(apiKey);
 
     setState(() {
       _state = GenerationState.analyzingMood();

@@ -66,24 +66,28 @@ class ProgressSection extends StatelessWidget {
               _buildStepIndicator(
                 '1',
                 '分析心情',
+                '理解情绪',
                 state.step.index >= GenerationStep.analyzingMood.index,
                 state.step == GenerationStep.analyzingMood,
               ),
               _buildStepIndicator(
                 '2',
                 '创作歌词',
+                '诗意表达',
                 state.step.index >= GenerationStep.generatingLyrics.index,
                 state.step == GenerationStep.generatingLyrics,
               ),
               _buildStepIndicator(
                 '3',
                 '生成音乐',
+                'AI作曲',
                 state.step.index >= GenerationStep.creatingMusic.index,
                 state.step == GenerationStep.creatingMusic,
               ),
               _buildStepIndicator(
                 '4',
                 '处理音频',
+                '完成制作',
                 state.step.index >= GenerationStep.processingAudio.index,
                 state.step == GenerationStep.processingAudio,
               ),
@@ -147,56 +151,69 @@ class ProgressSection extends StatelessWidget {
   Widget _buildStepIndicator(
     String number,
     String label,
+    String description,
     bool isCompleted,
     bool isActive,
   ) {
-    return Column(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isCompleted
-                ? const Color(0xFFFF6B9D)
-                : const Color(0xFFf0f0f0),
-            border: Border.all(
-              color: isActive
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isCompleted
                   ? const Color(0xFFFF6B9D)
-                  : Colors.transparent,
-              width: 2,
+                  : const Color(0xFFf0f0f0),
+              border: Border.all(
+                color: isActive
+                    ? const Color(0xFFFF6B9D)
+                    : Colors.transparent,
+                width: 2,
+              ),
+            ),
+            child: Center(
+              child: isCompleted
+                  ? const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 20,
+                    )
+                  : Text(
+                      number,
+                      style: TextStyle(
+                        color: isActive
+                            ? const Color(0xFFFF6B9D)
+                            : const Color(0xFF999),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
-          child: Center(
-            child: isCompleted
-                ? const Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 20,
-                  )
-                : Text(
-                    number,
-                    style: TextStyle(
-                      color: isActive
-                          ? const Color(0xFFFF6B9D)
-                          : const Color(0xFF999),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: isCompleted || isActive
+                  ? const Color(0xFF333)
+                  : const Color(0xFF999),
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: isCompleted || isActive
-                ? const Color(0xFF333)
-                : const Color(0xFF999),
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+          const SizedBox(height: 2),
+          Text(
+            description,
+            style: TextStyle(
+              fontSize: 10,
+              color: isCompleted || isActive
+                  ? const Color(0xFF666)
+                  : const Color(0xFFBBB),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
