@@ -243,13 +243,14 @@ class _ResultSectionState extends State<ResultSection> {
 
           // Music Info
           Container(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: const Color(0xFFF8F9FA),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
                   '音乐风格',
@@ -259,7 +260,7 @@ class _ResultSectionState extends State<ResultSection> {
                     color: Color(0xFF666),
                   ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 2),
                 Text(
                   widget.response.prompt,
                   style: const TextStyle(
@@ -269,7 +270,7 @@ class _ResultSectionState extends State<ResultSection> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 const Text(
                   '歌词',
                   style: TextStyle(
@@ -278,49 +279,23 @@ class _ResultSectionState extends State<ResultSection> {
                     color: Color(0xFF666),
                   ),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  widget.response.lyrics,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF000000),
-                    height: 1.3,
+                const SizedBox(height: 2),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxHeight: 120,
                   ),
-                  maxLines: 8,
-                  overflow: TextOverflow.ellipsis,
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Text(
+                      widget.response.lyrics,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF000000),
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
                 ),
-                if (widget.response.llmTraceId != null || widget.response.musicTraceId != null) ...[
-                  const SizedBox(height: 12),
-                  const Divider(),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'API Trace IDs',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF999),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  if (widget.response.llmTraceId != null)
-                    SelectableText(
-                      'LLM: ${widget.response.llmTraceId}',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF666),
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                  if (widget.response.musicTraceId != null)
-                    SelectableText(
-                      'Music: ${widget.response.musicTraceId}',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF666),
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                ],
               ],
             ),
           ),
