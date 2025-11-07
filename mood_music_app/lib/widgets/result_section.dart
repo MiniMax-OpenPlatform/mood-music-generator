@@ -252,17 +252,23 @@ class _ResultSectionState extends State<ResultSection> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  widget.response.prompt,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF000000),
-                    fontWeight: FontWeight.w600,
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFE5F1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  child: Text(
+                    widget.response.prompt,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF000000),
+                      fontWeight: FontWeight.bold,
+                      height: 1.4,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 ConstrainedBox(
                   constraints: const BoxConstraints(
                     maxHeight: 120,
