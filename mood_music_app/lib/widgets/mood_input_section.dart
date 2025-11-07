@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class MoodInputSection extends StatelessWidget {
   final TextEditingController moodController;
@@ -65,25 +64,9 @@ class MoodInputSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              const Text(
-                '没有 API Key？',
-                style: TextStyle(fontSize: 12, color: Color(0xFF666)),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final url = Uri.parse('https://platform.minimaxi.com/docs/guides/models-intro');
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                  }
-                },
-                child: const Text(
-                  '点击这里注册获取',
-                  style: TextStyle(fontSize: 12),
-                ),
-              ),
-            ],
+          const Text(
+            '没有 API Key？请访问: https://platform.minimaxi.com/user-center/basic-information/interface-key',
+            style: TextStyle(fontSize: 12, color: Color(0xFF666)),
           ),
 
           const SizedBox(height: 20),

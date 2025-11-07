@@ -238,7 +238,7 @@ class _ResultSectionState extends State<ResultSection> {
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // Music Info
           Container(
@@ -320,7 +320,7 @@ class _ResultSectionState extends State<ResultSection> {
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
 
           // Action Buttons
           Row(
