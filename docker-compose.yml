@@ -8,12 +8,13 @@ services:
       - PORT=5111
       - http_proxy=http://pac-internal.xaminim.com:3129
       - https_proxy=http://pac-internal.xaminim.com:3129
+      - no_proxy=localhost,127.0.0.1
     volumes:
       # 持久化临时音频文件（如果使用 hex 模式）
       - ./temp_sessions:/app/temp_sessions
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5111/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5111/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
