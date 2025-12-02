@@ -14,7 +14,7 @@ services:
       - ./temp_sessions:/app/temp_sessions
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5111/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5111/moodmusic/health')"]
       interval: 30s
       timeout: 10s
       retries: 3

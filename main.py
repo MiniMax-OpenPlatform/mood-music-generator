@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi import FastAPI, Request, Form, HTTPException, APIRouter
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, FileResponse
@@ -13,8 +13,11 @@ load_dotenv()
 
 app = FastAPI(title="心情音乐生成器", version="1.0.0")
 
-# 静态文件和模板
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# 创建带前缀的路由器
+router = APIRouter(prefix="/moodmusic")
+
+# 静态文件挂载到带前缀的路径
+app.mount("/moodmusic/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 TEMP_DIR = "temp_sessions"
@@ -157,11 +160,11 @@ def generate_music(prompt: str, lyrics: str, api_key: str) -> dict:
         "trace_id": music_trace_id
     }
 
-@app.get("/", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.post("/generate_prompt")
+@router.post("/generate_prompt")
 async def generate_prompt(mood: str = Form(...), api_key: str = Form(...)):
     """第一步：只生成音乐提示词和歌词，供用户编辑"""
     try:
@@ -188,7 +191,7 @@ async def generate_prompt(mood: str = Form(...), api_key: str = Form(...)):
         print(f"❌ Error in generate_prompt endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/generate_music")
+@router.post("/generate_music")
 async def generate_music_endpoint(
     prompt: str = Form(...),
     lyrics: str = Form(...),
@@ -223,7 +226,7 @@ async def generate_music_endpoint(
         print(f"❌ Error in generate_music endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/generate")
+@router.post("/generate")
 async def generate(mood: str = Form(...), api_key: str = Form(...)):
     """完整流程：生成提示词 + 生成音乐（兼容旧版）"""
     try:
@@ -257,7 +260,7 @@ async def generate(mood: str = Form(...), api_key: str = Form(...)):
         print(f"❌ Error in generate endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/download/{session_id}/{filename}")
+@router.get("/download/{session_id}/{filename}")
 async def download(session_id: str, filename: str):
     file_path = os.path.join(TEMP_DIR, session_id, filename)
     if os.path.exists(file_path):
@@ -272,9 +275,12 @@ async def download(session_id: str, filename: str):
     else:
         raise HTTPException(status_code=404, detail="文件不存在")
 
-@app.get("/health")
+@router.get("/health")
 async def health():
     return {"status": "healthy"}
+
+# 将路由器包含到主应用
+app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn

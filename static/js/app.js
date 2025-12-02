@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function() {
             formData.append("api_key", apiKey);
             formData.append("mood", mood);
 
-            const response = await fetch("/generate_prompt", {
+            const response = await fetch("./generate_prompt", {
                 method: "POST",
                 body: formData
             });
@@ -192,7 +192,7 @@ document.addEventListener("DOMContentLoaded", function() {
             formData.append("prompt", prompt);
             formData.append("lyrics", lyrics);
 
-            const response = await fetch("/generate_music", {
+            const response = await fetch("./generate_music", {
                 method: "POST",
                 body: formData
             });
