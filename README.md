@@ -1,6 +1,7 @@
 # 心情音乐生成器 🎵
 
 基于 MiniMax AI 的心情音乐生成应用。支持 Web 网页版和 Android 移动端，用户输入当前心情和 API Key，系统会自动生成一首符合心情的原创音乐，包含歌词和音频，可用于分享和收藏。
+
 <img width="625" height="1426" alt="image" src="https://github.com/user-attachments/assets/316c8d34-aa70-4496-b4ac-c0de97f41e3a" />
 
 
