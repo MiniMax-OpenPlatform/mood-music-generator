@@ -4,7 +4,7 @@
 <img width="625" height="1426" alt="image" src="https://github.com/user-attachments/assets/316c8d34-aa70-4496-b4ac-c0de97f41e3a" />
 
 
-## 📱 在线web体验： [点击进入]((https://solution.minimaxi.com/moodmusic/)) 
+## 📱 在线web体验： [点击进入](https://solution.minimaxi.com/moodmusic/)
 ## 📱 快速下载 Android 应用
 
 ### 方式 1：直接下载最新版本（推荐）
