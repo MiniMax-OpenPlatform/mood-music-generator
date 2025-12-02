@@ -6,6 +6,8 @@ services:
       - "5111:5111"
     environment:
       - PORT=5111
+      - http_proxy=http://pac-internal.xaminim.com:3129
+      - https_proxy=http://pac-internal.xaminim.com:3129
     volumes:
       # 持久化临时音频文件（如果使用 hex 模式）
       - ./temp_sessions:/app/temp_sessions

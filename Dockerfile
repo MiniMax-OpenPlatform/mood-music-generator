@@ -25,10 +25,6 @@ COPY static ./static
 # 创建临时文件目录
 RUN mkdir -p temp_sessions
 
-# 清除构建时的代理环境变量（运行时不需要）
-ENV http_proxy="" \
-    https_proxy=""
-
 # 暴露端口
 EXPOSE 5111
 
