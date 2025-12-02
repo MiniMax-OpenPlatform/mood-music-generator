@@ -5,6 +5,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const generateBtn = document.getElementById("generateBtn");
     const btnText = generateBtn.querySelector(".btn-text");
     const btnLoading = generateBtn.querySelector(".btn-loading");
+
+    // 编辑区域
+    const editSection = document.getElementById("editSection");
+    const editForm = document.getElementById("editForm");
+    const editPrompt = document.getElementById("editPrompt");
+    const editLyrics = document.getElementById("editLyrics");
+    const generateMusicBtn = document.getElementById("generateMusicBtn");
+    const backToInputBtn = document.getElementById("backToInputBtn");
+
     const resultSection = document.getElementById("resultSection");
     const errorSection = document.getElementById("errorSection");
     const audioPlayer = document.getElementById("audioPlayer");
@@ -19,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const moodTags = document.querySelectorAll(".mood-tag");
 
     let currentMusicData = null;
+    let currentApiKey = null; // 保存 API Key
     const progressSection = document.getElementById("progressSection");
     const progressFill = document.getElementById("progressFill");
     const progressMessage = document.getElementById("progressMessage");
@@ -66,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // 提交表单生成音乐
+    // 第一步：提交心情，生成 LLM prompt 和 lyrics
     moodForm.addEventListener("submit", async function(e) {
         e.preventDefault();
 
@@ -85,18 +95,21 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        // 显示加载状态和进度
+        // 保存 API Key
+        currentApiKey = apiKey;
+
+        // 显示加载状态
         generateBtn.disabled = true;
         btnText.style.display = "none";
         btnLoading.style.display = "inline-block";
+        editSection.style.display = "none";
         resultSection.style.display = "none";
         errorSection.style.display = "none";
         showProgress();
 
         try {
-            // 步骤 1: 开始分析
+            // 步骤 1: 分析心情
             updateProgress(1, "正在分析你的心情...");
-            await new Promise(resolve => setTimeout(resolve, 500));
 
             // 步骤 2: 生成歌词
             updateProgress(2, "正在生成歌词...");
@@ -105,45 +118,29 @@ document.addEventListener("DOMContentLoaded", function() {
             formData.append("api_key", apiKey);
             formData.append("mood", mood);
 
-            const startTime = Date.now();
-            const response = await fetch("/generate", {
+            const response = await fetch("/generate_prompt", {
                 method: "POST",
                 body: formData
             });
 
-            // 步骤 3: 创作音乐
-            const elapsed = Date.now() - startTime;
-            if (elapsed < 2000) {
-                await new Promise(resolve => setTimeout(resolve, 2000 - elapsed));
-            }
-            updateProgress(3, "正在创作音乐...");
-
             const data = await response.json();
 
             if (response.ok && data.status === "success") {
-                // 步骤 4: 处理音频
-                updateProgress(4, "正在处理音频...");
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // 步骤 3: 完成
+                updateProgress(3, "✨ 生成完成！");
+                await new Promise(resolve => setTimeout(resolve, 500));
 
-                // 保存音乐数据
-                currentMusicData = data;
+                // 在控制台显示 trace_id
+                console.log("LLM Trace-ID:", data.llm_trace_id);
 
-                // 显示结果
-                musicPrompt.textContent = data.prompt;
-                musicLyrics.textContent = data.lyrics;
-                audioSource.src = data.file_url;
-                audioPlayer.load();
-                downloadBtn.href = data.file_url;
+                // 填充编辑表单
+                editPrompt.value = data.prompt;
+                editLyrics.value = data.lyrics;
 
-                // 完成
-                updateProgress(4, "✨ 创作完成！");
-                await new Promise(resolve => setTimeout(resolve, 800));
-
+                // 隐藏进度，显示编辑界面
                 hideProgress();
-                resultSection.style.display = "block";
-
-                // 滚动到结果区域
-                resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+                editSection.style.display = "block";
+                editSection.scrollIntoView({ behavior: "smooth", block: "start" });
 
             } else {
                 throw new Error(data.detail || "生成失败");
@@ -161,6 +158,100 @@ document.addEventListener("DOMContentLoaded", function() {
             btnText.style.display = "inline-block";
             btnLoading.style.display = "none";
         }
+    });
+
+    // 第二步：使用编辑后的 prompt 和 lyrics 生成音乐
+    editForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const prompt = editPrompt.value.trim();
+        const lyrics = editLyrics.value.trim();
+
+        if (!prompt || !lyrics) {
+            alert("请确保音乐风格和歌词都已填写");
+            return;
+        }
+
+        // 显示加载状态
+        const musicBtnText = generateMusicBtn.querySelector(".btn-text");
+        const musicBtnLoading = generateMusicBtn.querySelector(".btn-loading");
+        generateMusicBtn.disabled = true;
+        musicBtnText.style.display = "none";
+        musicBtnLoading.style.display = "inline-block";
+
+        resultSection.style.display = "none";
+        errorSection.style.display = "none";
+        showProgress();
+
+        try {
+            // 步骤 1-2: 跳过（已完成）
+            updateProgress(2, "正在创作音乐...");
+
+            const formData = new FormData();
+            formData.append("api_key", currentApiKey);
+            formData.append("prompt", prompt);
+            formData.append("lyrics", lyrics);
+
+            const response = await fetch("/generate_music", {
+                method: "POST",
+                body: formData
+            });
+
+            // 步骤 3: 创作音乐
+            updateProgress(3, "正在创作音乐...");
+
+            const data = await response.json();
+
+            if (response.ok && data.status === "success") {
+                // 步骤 4: 处理音频
+                updateProgress(4, "正在处理音频...");
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // 保存音乐数据
+                currentMusicData = data;
+
+                // 显示结果
+                musicPrompt.textContent = data.prompt;
+                musicLyrics.textContent = data.lyrics;
+                audioSource.src = data.audio_url;
+                audioPlayer.load();
+                downloadBtn.href = data.audio_url;
+
+                // 在控制台显示 trace_id
+                console.log("Music Trace-ID:", data.music_trace_id);
+
+                // 完成
+                updateProgress(4, "✨ 创作完成！");
+                await new Promise(resolve => setTimeout(resolve, 800));
+
+                hideProgress();
+                editSection.style.display = "none";
+                resultSection.style.display = "block";
+                resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+
+            } else {
+                throw new Error(data.detail || "音乐生成失败");
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            hideProgress();
+            errorMessage.textContent = error.message || "网络错误，请稍后重试";
+            errorSection.style.display = "block";
+            errorSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        } finally {
+            // 恢复按钮状态
+            generateMusicBtn.disabled = false;
+            musicBtnText.style.display = "inline-block";
+            musicBtnLoading.style.display = "none";
+        }
+    });
+
+    // 返回修改心情
+    backToInputBtn.addEventListener("click", function() {
+        editSection.style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        moodInput.focus();
     });
 
     // 分享到朋友圈

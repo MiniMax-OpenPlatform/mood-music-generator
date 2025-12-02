@@ -9,3 +9,4 @@ temp_sessions/
 venv/
 *.log
 .DS_Store
+*.backup

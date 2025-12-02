@@ -89,6 +89,52 @@
                 </div>
             </div>
 
+            <!-- Edit Section - 编辑音乐风格和歌词 -->
+            <div id="editSection" class="edit-section" style="display: none;">
+                <div class="edit-card">
+                    <h2>✍️ 编辑音乐风格和歌词</h2>
+                    <p class="edit-hint">AI 已为你生成初步内容，你可以直接使用或修改后再生成音乐</p>
+
+                    <form id="editForm">
+                        <div class="form-group">
+                            <label for="editPrompt">🎨 音乐风格</label>
+                            <input
+                                type="text"
+                                id="editPrompt"
+                                name="prompt"
+                                placeholder="流行,女声,吉他伴奏,温柔,午后阳光"
+                                required
+                            >
+                            <p class="field-hint">格式：曲风,人声类型,乐器,情绪,氛围（用逗号分隔）</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editLyrics">📝 歌词内容</label>
+                            <textarea
+                                id="editLyrics"
+                                name="lyrics"
+                                rows="12"
+                                placeholder="[Intro]&#10;开场歌词...&#10;&#10;[Verse]&#10;主歌歌词..."
+                                required
+                            ></textarea>
+                            <p class="field-hint">建议包含：[Intro], [Verse], [Pre-Chorus], [Chorus], [Outro] 等结构标签</p>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button type="submit" id="generateMusicBtn" class="btn-primary">
+                                <span class="btn-text">🎵 生成音乐</span>
+                                <span class="btn-loading" style="display: none;">
+                                    <span class="spinner"></span> 正在生成中...
+                                </span>
+                            </button>
+                            <button type="button" id="backToInputBtn" class="btn-outline">
+                                ← 返回修改心情
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div id="resultSection" class="result-section" style="display: none;">
                 <div class="result-card">
                     <h2>🎼 你的专属音乐已生成</h2>

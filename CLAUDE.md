@@ -4,48 +4,85 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a mood-based music generation web application that uses MiniMax AI APIs. Users input their current mood, and the system generates custom music with lyrics that can be shared on social media.
+This is a mood-based music generation application available in both Web and Android versions. Users input their current mood and MiniMax API key, and the system generates custom music with lyrics that can be shared on social media.
 
 **Tech Stack:**
+
+*Web Version:*
 - Backend: Python + FastAPI
 - Frontend: HTML5 + CSS3 + Vanilla JavaScript
-- AI Services: MiniMax LLM (text generation) + MiniMax Music API (music generation)
+
+*Android Version:*
+- Framework: Flutter 3.19.0 + Dart
+- UI: Material Design 3 with pink gradient theme
+- HTTP Client: Dio
+- Audio: audioplayers
+- State Management: Provider
+- Sharing: share_plus
+
+*AI Services:*
+- MiniMax LLM (MiniMax-Text-01) - Mood analysis and lyrics generation
+- MiniMax Music API (music-2.0) - Music generation
 
 ## Common Commands
 
-### Development
+### Web Development
 
 ```bash
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
 
 # Start development server (with auto-reload)
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn main:app --host 0.0.0.0 --port 5111 --reload
 
 # Start production server
-python main.py
+python3 main.py
 
 # Or use the startup script
 ./start.sh
+
+# Stop server
+pkill -f "python3 main.py"
+
+# Run in background
+nohup python3 main.py > app.log 2>&1 &
+```
+
+### Android Development
+
+```bash
+# Navigate to Flutter app directory
+cd mood_music_app
+
+# Install dependencies
+flutter pub get
+
+# Run on connected device/emulator
+flutter run
+
+# Build APK (all architectures)
+flutter build apk --release --split-per-abi
+
+# Build outputs are in:
+# mood_music_app/build/app/outputs/flutter-apk/
+# - app-arm64-v8a-release.apk (recommended for most devices)
+# - app-armeabi-v7a-release.apk (older devices)
+# - app-x86_64-release.apk (emulators)
 ```
 
 ### Configuration
 
-```bash
-# Setup environment variables
-cp .env.example .env
-# Then edit .env to add your MINIMAX_API_KEY
-```
+**Important:** API Key is provided by users at runtime via the UI - no `.env` file needed for basic operation. The `.env.example` file exists but the default port is 5111.
 
 ## Architecture
 
-### Request Flow
+### Web App Request Flow
 
-1. **User Input** → User enters mood description in frontend
+1. **User Input** → User enters API key + mood description in frontend
 2. **Mood Analysis** → Backend calls MiniMax LLM API (`generate_music_prompt_with_llm`)
    - Analyzes mood
-   - Generates music style prompt (English)
-   - Creates lyrics (Chinese, 4-8 lines)
+   - Generates music style prompt (Chinese description)
+   - Creates structured lyrics with [Intro], [Verse], [Chorus], [Bridge], [Outro] tags
 3. **Music Generation** → Backend calls MiniMax Music API (`generate_music`)
    - Uses prompt and lyrics from step 2
    - Returns audio data in hex format
@@ -53,18 +90,42 @@ cp .env.example .env
 5. **Response** → Return audio URL, prompt, and lyrics to frontend
 6. **Playback** → Frontend displays lyrics and plays audio with HTML5 audio player
 
+### Android App Request Flow
+
+1. **User Input** → User enters API key + mood in Flutter UI
+2. **Service Call** → `MinimaxService.generateFromMood()` orchestrates the process
+3. **LLM Request** → `generatePromptAndLyrics()` calls MiniMax LLM API
+   - Returns prompt and lyrics in JSON format
+   - Extracts trace_id for debugging
+4. **Music Request** → `generateMusic()` calls MiniMax Music API with `output_format: 'url'`
+   - API returns direct URL to audio file (not hex data)
+   - Extracts trace_id from response body
+5. **Result Display** → `MusicResponse` object contains audioUrl, prompt, lyrics, and trace IDs
+6. **Playback** → `audioplayers` package streams audio from URL
+
 ### Key Components
 
-**Backend (`main.py`):**
+**Web Backend (`main.py`):**
 - `generate_music_prompt_with_llm()` - LLM integration for mood analysis
 - `generate_music()` - Music generation API integration
-- `/generate` endpoint - Main API for music generation
+- `/generate` endpoint - Main API (receives api_key + mood as form data)
 - `/download/{session_id}/{filename}` - Audio file serving
+- `/health` endpoint - Health check
 
-**Frontend:**
-- `templates/index.html` - Main UI with mood input form
+**Web Frontend:**
+- `templates/index.html` - Main UI with mood input form and API key field
 - `static/js/app.js` - Handles form submission, audio playback, sharing
-- `static/css/style.css` - Modern gradient design with animations
+- `static/css/style.css` - Pink gradient design with animations
+
+**Android App Structure:**
+- `lib/main.dart` - App entry point, MaterialApp with pink theme
+- `lib/screens/home_screen.dart` - Main screen with state management
+- `lib/services/minimax_service.dart` - MiniMax API client
+  - Handles both LLM and Music API calls
+  - Extracts trace_id for debugging
+  - Uses `output_format: 'url'` to get direct audio URLs
+- `lib/models/` - Data models (MusicResponse, GenerationState)
+- `lib/widgets/` - Reusable UI components (MoodInputSection, ProgressSection, ResultSection)
 
 ### API Integration Details
 
@@ -72,58 +133,107 @@ cp .env.example .env
 - Endpoint: `https://api.minimaxi.com/v1/text/chatcompletion_v2`
 - Model: `MiniMax-Text-01`
 - Auth: Bearer token in `Authorization` header
-- Reference: See `/data1/devin/test_yiyun/trans.py` for example usage
+- Request includes system prompt defining JSON output format
+- Response contains trace_id in headers (Web) or body (may vary)
+- Output: JSON with `prompt` (music style) and `lyrics` (song structure)
 
 **MiniMax Music API:**
 - Endpoint: `https://api.minimaxi.com/v1/music_generation`
 - Model: `music-2.0`
-- Returns audio as hex string in `data.audio` field
-- Reference: See `/data1/devin/minimax-tools/app/routes/music.py`
+- Auth: Bearer token in `Authorization` header
+- Parameters:
+  - `prompt`: Music style description
+  - `lyrics`: Song lyrics with structure tags
+  - `audio_setting`: {sample_rate: 44100, bitrate: 256000, format: 'mp3'}
+  - `output_format`: 'url' (Android) or omit for hex (Web)
+- Web response: Audio as hex string in `data.audio` field
+- Android response: Direct URL in `data.audio` field
+- Response includes trace_id in body `trace_id` field
+
+**Important Differences:**
+- Web backend converts hex to MP3 file and serves it
+- Android uses `output_format: 'url'` to get direct streaming URL
+- Both platforms extract trace_id for debugging purposes
 
 ### File Storage
 
+**Web App:**
 - Generated audio files stored in `temp_sessions/{session_id}/`
 - Format: `music_{timestamp}.mp3`
-- Files should be periodically cleaned up (not implemented yet)
+- Files persist until manually cleaned
+- Clean up with: `find temp_sessions/ -type f -mtime +7 -delete`
+
+**Android App:**
+- No local file storage required (streams from URL)
+- API key stored in shared_preferences for convenience
 
 ## Development Notes
 
 ### Testing API Integration
 
 Before running the app, ensure:
-1. Valid MiniMax API key in `.env`
-2. Sufficient API credits
+1. Valid MiniMax API key (get from https://platform.minimaxi.com/user-center/basic-information/interface-key)
+2. Sufficient API credits in account
 3. Network access to `api.minimaxi.com`
+4. For Android: Physical device or emulator with internet access
 
 ### Error Handling
 
-The app handles several error cases:
-- Invalid/missing API key
-- LLM API failures (falls back to default prompt/lyrics)
-- Music API failures (returns HTTP error to frontend)
-- Missing audio files (404 response)
+**Web App:**
+- Invalid/missing API key → 400 error
+- LLM API failures → Falls back to default prompt/lyrics
+- Music API failures → Returns HTTP error to frontend
+- Missing audio files → 404 response
 
-### Frontend Features
+**Android App:**
+- Network errors → User-friendly error messages
+- LLM failures → Fallback to default Chinese lyrics
+- Music API failures → Shows trace_id for debugging
+- Timeout settings: 30s connect, 120s receive
 
-- Quick mood selection buttons for common moods
-- Real-time loading states with spinner
-- Audio player with controls
-- Download button for saving music
-- Share functionality (uses Web Share API or clipboard fallback)
+### Debugging
+
+**Trace IDs:**
+Both platforms capture trace_id from API responses for debugging:
+- Web: Logged to console
+- Android: Displayed in UI and logged to console
+- Use trace_id when contacting MiniMax support
+
+### CI/CD Automation
+
+**GitHub Actions Workflows:**
+
+`.github/workflows/build-apk.yml`:
+- Triggers on push to `master` when `mood_music_app/**` changes
+- Manual trigger via "Run workflow" button
+- Builds split APKs for arm64-v8a, armeabi-v7a, x86_64
+- Automatically creates GitHub Release with APK files
+- Release naming: `v{date}-{short-sha}`
+
+`.github/workflows/build-ios.yml`:
+- iOS build workflow (unsigned)
+- Requires manual signing before distribution
+
+**Release Process:**
+1. Push changes to `master` branch
+2. If `mood_music_app/` modified, APK build auto-triggers
+3. Or manually trigger from Actions tab
+4. Check build status at: https://github.com/[owner]/[repo]/actions
+5. Download APKs from Releases page
 
 ### Known Limitations
 
-- No rate limiting implemented
-- No user authentication
-- Temporary files not auto-cleaned
-- LLM response parsing may fail if JSON format is incorrect (has fallback)
+- Web: No rate limiting implemented
+- Web: No user authentication
+- Web: Temporary files not auto-cleaned
+- Web: LLM response parsing may fail if JSON format is incorrect (has fallback)
+- Android: No offline mode (requires internet for API calls)
 
 ## Customization
 
 ### Modify Music Generation Parameters
 
-Edit `main.py`, function `generate_music()`:
-
+**Web:** Edit `main.py:107`, function `generate_music()`:
 ```python
 "audio_setting": {
     "sample_rate": 44100,  # Sample rate
@@ -132,12 +242,40 @@ Edit `main.py`, function `generate_music()`:
 }
 ```
 
+**Android:** Edit `mood_music_app/lib/services/minimax_service.dart:135`:
+```dart
+'audio_setting': {
+  'sample_rate': 44100,
+  'bitrate': 256000,
+  'format': 'mp3',
+}
+```
+
 ### Modify LLM Prompts
 
-Edit `main.py`, function `generate_music_prompt_with_llm()`, in the `messages` array.
+**Web:** Edit `main.py:22`, function `generate_music_prompt_with_llm()`, in the `messages` array at line 33-68.
+
+**Android:** Edit `mood_music_app/lib/services/minimax_service.dart:28`, in the `messages` array at line 40-55.
 
 ### Modify UI Themes
 
-Edit `static/css/style.css`, change gradient colors in:
+**Web:** Edit `static/css/style.css`, change gradient colors in:
 - `body` background
 - `.btn-primary` background
+
+**Android:** Edit `mood_music_app/lib/main.dart:34`:
+```dart
+seedColor: const Color(0xFFFF6B9D),  // Pink theme color
+```
+
+### Change Default Port
+
+Edit `.env` file (create from `.env.example`):
+```
+PORT=8080  # Change to desired port
+```
+
+Or pass directly when running:
+```bash
+PORT=8080 python3 main.py
+```
