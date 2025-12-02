@@ -69,6 +69,18 @@ docker run -d --name mood-music-generator -p 5111:5111 mood-music-generator:late
 
 **详细文档**: 参考 [DOCKER.md](DOCKER.md)
 
+**访问地址：**
+```
+主页: http://localhost:5111/moodmusic/
+健康检查: http://localhost:5111/moodmusic/health
+API 端点:
+  - /moodmusic/generate_prompt (生成提示词和歌词)
+  - /moodmusic/generate_music (生成音乐)
+  - /moodmusic/generate (完整流程，兼容旧版)
+```
+
+**注意:** 所有 Web 服务路由都使用 `/moodmusic` 前缀，前端使用相对路径进行 API 调用。
+
 ### Android Development
 
 ```bash
