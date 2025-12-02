@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# 临时文件
+temp_sessions/*
+*.log
+*.backup
+app.log
+nohup.out
+
+# Android 项目
+mood_music_app/
+
+# 文档
+*.md
+!README.md
+Qcode.png
+
+# 环境变量（不打包到镜像，运行时传入）
+.env
+
+# 测试文件
+test_*.py
+trans.py
+
+# Shell 脚本
+*.sh

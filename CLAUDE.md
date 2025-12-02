@@ -28,6 +28,7 @@ This is a mood-based music generation application available in both Web and Andr
 
 ### Web Development
 
+**传统方式（Python 直接运行）：**
 ```bash
 # Install Python dependencies
 pip install -r requirements.txt
@@ -47,6 +48,26 @@ pkill -f "python3 main.py"
 # Run in background
 nohup python3 main.py > app.log 2>&1 &
 ```
+
+**Docker 方式（推荐生产环境）：**
+```bash
+# Quick start with Docker Compose
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop service
+docker compose down
+
+# Build image manually (if needed)
+docker build -t mood-music-generator:latest .
+
+# Run with Docker
+docker run -d --name mood-music-generator -p 5111:5111 mood-music-generator:latest
+```
+
+**详细文档**: 参考 [DOCKER.md](DOCKER.md)
 
 ### Android Development
 
