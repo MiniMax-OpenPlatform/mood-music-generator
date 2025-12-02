@@ -7,25 +7,12 @@
 ## 📱 在线web体验： [点击进入](https://solution.minimaxi.com/moodmusic/)
 ## 📱 快速下载 Android 应用
 
-### 方式 1：直接下载最新版本（推荐）
-
 访问 [Releases 页面](https://github.com/MiniMax-OpenPlatform/mood-music-generator/releases/latest) 下载最新的 APK 安装包：
 
 - **app-arm64-v8a-release.apk** - 适用于大多数新设备（推荐）
 - **app-armeabi-v7a-release.apk** - 适用于较旧的设备
 - **app-x86_64-release.apk** - 适用于模拟器
 
-### 方式 2：查看所有版本
-
-访问 [所有 Releases](https://github.com/MiniMax-OpenPlatform/mood-music-generator/releases) 查看历史版本
-
-### Android 安装步骤
-
-1. 下载适合你设备的 APK 文件
-2. 在手机设置中允许"安装未知来源的应用"
-3. 打开下载的 APK 文件进行安装
-4. 安装完成后打开应用
-5. 输入 MiniMax API Key 开始使用
 
 ## ✨ 功能特性
 
@@ -38,17 +25,11 @@
 - 📥 **下载功能**：支持下载生成的音乐
 - 📤 **社交分享**：一键分享你的专属音乐
 
-### Web 版特性
-- 🌐 **跨平台访问**：支持所有现代浏览器
-- 📱 **响应式设计**：完美支持手机和电脑访问
-- 🎨 **粉红色主题**：现代化渐变设计
+### 未来可扩展功能
 
-### Android 版特性
-- 📱 **原生体验**：流畅的移动端操作
-- 🎨 **粉红色主题**：美观的渐变界面设计
-- 🎵 **内置播放器**：支持暂停、进度控制
-- ⚡ **快速启动**：随时随地生成音乐
-- 🔄 **实时进度**：可视化创作步骤
+- 输入图片生成歌曲
+- 输入文章或网页链接生成歌曲
+- 
 
 ## 🚀 Web 版快速开始
 
@@ -88,13 +69,13 @@ uvicorn main:app --host 0.0.0.0 --port 5111 --reload
 在浏览器中打开：
 
 ```
-http://localhost:5111
+http://localhost:5111/moodmusic
 ```
 
 如果是远程服务器：
 
 ```
-http://服务器IP:5111
+http://服务器IP:5111/moodmusic
 ```
 
 ## 🎯 使用方法
